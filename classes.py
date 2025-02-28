@@ -17,7 +17,6 @@ class Base_Algorthm(ABC):
 
     def gen_feed(self):
         name = str(self.__class__).split('.')[-1].replace("'>", '')
-        print(len(self.feed))
         cc = cv.VideoWriter_fourcc(*'mp4v')
         print(self.writer.open(f"{name}.MP4", cc, 4, (520, 480), True))
         for c, i in enumerate(self.feed):
