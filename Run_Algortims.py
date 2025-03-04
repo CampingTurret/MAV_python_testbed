@@ -5,19 +5,21 @@ import algortims
 import pathlib
 import numpy as np
 import time
+import platform
 
 
 if __name__ == "__main__":
-    f = open('Confix.txt')
+    f = open('Config.txt')
     for line in f.readlines():
         p, v = line.replace('\n','').split(':')
         if p == 'f1':
             f1 = v
         if p == 'f2':
             f2 = v
-        if p == 'seperator':
-            seperator = v
-    print(f'Images{seperator}{f1}')
+    if platform.system() == 'Windows':
+        seperator = '\\'
+    if platform.system() == 'Linux':
+        seperator = '/'
     f.close()
     Images = Get_Image_dict()
     #f1 = "cyberzoo_poles_panels_mats" #cyberzoo_aggressive_flight
