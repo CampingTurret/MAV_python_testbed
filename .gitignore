@@ -160,3 +160,5 @@ cython_debug/
 #.idea/
 /Images
 *.MP4
+Confix.txt
+Config.txt
