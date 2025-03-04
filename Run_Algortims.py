@@ -8,8 +8,8 @@ import time
 
 if __name__ == "__main__":
     Images = Get_Image_dict()
-    f1 = "cyberzoo_poles_panels_mats" #cyberzoo_aggressive_flight
-    f2 = "20190121-142935"#20190121-144646
+    f1 = "cyberzoo_aggressive_flight" #cyberzoo_aggressive_flight
+    f2 = "20190121-144646"#20190121-144646
     res = {}
     ex_images: dict = Images[f"Images\\{f1}"][f"Images\\{f1}\\{f2}"]
     I_len = len(ex_images)
