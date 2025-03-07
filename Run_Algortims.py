@@ -6,7 +6,7 @@ import pathlib
 import numpy as np
 import time
 import platform
-
+from tqdm import tqdm
 
 if __name__ == "__main__":
     f = open('Config.txt')
@@ -27,10 +27,10 @@ if __name__ == "__main__":
     res = {}
     ex_images: dict = Images[f"Images{seperator}{f1}"][f"Images{seperator}{f1}{seperator}{f2}"]
     I_len = len(ex_images)
-    for sub in Base_Algorthm.__subclasses__():
+    for sub in tqdm(Base_Algorthm.__subclasses__()):
         dt = time.time()
         cc = sub()
-        for k,image in ex_images.items():
+        for k,image in tqdm(sorted(ex_images.items(), key=lambda x: x[0].split(seperator)[-1])):
             if image == '.jpg':
                 im = cv.imread(pathlib.Path(k).absolute())
                 im = cv.transpose(im)
