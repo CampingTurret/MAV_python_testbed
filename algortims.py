@@ -4,48 +4,54 @@ from scipy.signal import convolve2d
 import scipy.ndimage.filters
 import cv2 as cv
 
-class EDGE(classes.Base_Algorthm):
+R = 200
+G = 100
+B = 100
 
-    def __init__(self):
-        super().__init__()
+EDGE_on = False
+if(EDGE_on):
+    class EDGE(classes.Base_Algorthm):
+
+        def __init__(self):
+            super().__init__()
+            
+
+        def execute(self, image):
+            """Return image! and add to feed!"""
+            self.org_feed.append(image)
+            edges = np.zeros_like(image)
+            blurred = np.zeros_like(image)
+            gray =  np.zeros_like(image)
+            k = np.array([[1, 4, 7, 4, 1],
+                        [4, 16, 26, 16, 4],
+                        [7, 26, 41, 26, 7],
+                        [4, 16, 26, 16, 4],
+                        [1, 4, 7, 4, 1]])
+            horizontal = np.array([[0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0],
+                        [-1,-1, 4,-1,-1],
+                        [0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0]])
+            vertical = np.array([[0, 0, -1, 0, 0],
+                        [0, 0, -1, 0, 0],
+                        [0,0, 4,0,0],
+                        [0, 0, -1, 0, 0],
+                        [0, 0, -1, 0, 0]])
+            
+
+            for dim in range(np.shape(image)[2]):
+                blurred[:,:, dim] = convolve2d(image[:,:, dim], k, mode='same', boundary='fill', fillvalue=0) // 273
+
+
+            gray = (convolve2d(np.sum(blurred, axis=2), horizontal + vertical, mode='same', boundary='fill', fillvalue=0) // 3) / 255
+            gray = np.where(gray > 0.05, 1, 0)
+            for dim in range(np.shape(image)[2]):
+                edges[:,:, dim] = gray*255# *blurred[:,:, dim]
+            self.feed.append(edges)
+            return edges
         
-
-    def execute(self, image):
-        """Return image! and add to feed!"""
-        self.org_feed.append(image)
-        edges = np.zeros_like(image)
-        blurred = np.zeros_like(image)
-        gray =  np.zeros_like(image)
-        k = np.array([[1, 4, 7, 4, 1],
-                      [4, 16, 26, 16, 4],
-                      [7, 26, 41, 26, 7],
-                      [4, 16, 26, 16, 4],
-                      [1, 4, 7, 4, 1]])
-        horizontal = np.array([[0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0],
-                      [-1,-1, 4,-1,-1],
-                      [0, 0, 0, 0, 0],
-                      [0, 0, 0, 0, 0]])
-        vertical = np.array([[0, 0, -1, 0, 0],
-                      [0, 0, -1, 0, 0],
-                      [0,0, 4,0,0],
-                      [0, 0, -1, 0, 0],
-                      [0, 0, -1, 0, 0]])
-        
-
-        for dim in range(np.shape(image)[2]):
-            blurred[:,:, dim] = convolve2d(image[:,:, dim], k, mode='same', boundary='fill', fillvalue=0) // 273
-
-
-        gray = (convolve2d(np.sum(blurred, axis=2), horizontal + vertical, mode='same', boundary='fill', fillvalue=0) // 3) / 255
-        gray = np.where(gray > 0.05, 1, 0)
-        for dim in range(np.shape(image)[2]):
-            edges[:,:, dim] = gray*255# *blurred[:,:, dim]
-        self.feed.append(edges)
-        return edges
-    
-    def run_edge(image):
-        pass
+        def run_edge(image):
+            pass
 
 
 
@@ -59,7 +65,7 @@ class GREEN_FLOOR(classes.Base_Algorthm):
 
         blue = np.zeros_like(image)
 
-        cond = np.logical_and(np.logical_and(image[:,:, 1] > 70, image[:,:, 2] < 100),image[:,:, 0] < 90)
+        cond = np.logical_and(np.logical_and(image[:,:, 1] > G, image[:,:, 2] < R),image[:,:, 0] < B)
         blue[:,:,1] = np.where(cond, 255, 0)    
 
 
@@ -81,7 +87,7 @@ class GREEN_FLOOR_Fit_houghP(classes.Base_Algorthm):
         geen_edges = np.zeros_like(image)
         geen_lines = np.zeros_like(image)
 
-        cond = np.logical_and(np.logical_and(image[:,:, 1] > 70, image[:,:, 2] < 100),image[:,:, 0] < 90)
+        cond = np.logical_and(np.logical_and(image[:,:, 1] > G, image[:,:, 2] < R),image[:,:, 0] < B)
         blue[:,:,1] = np.where(cond, 255, 0)    
         horizontal = np.array([[0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0],
@@ -121,7 +127,7 @@ class GREEN_FLOOR_Fit_ContourCV(classes.Base_Algorthm):
         geen_edges = np.zeros_like(image)
         geen_lines = np.zeros_like(image)
 
-        cond = np.logical_and(np.logical_and(image[:,:, 1] > 70, image[:,:, 2] < 100),image[:,:, 0] < 90)
+        cond = np.logical_and(np.logical_and(image[:,:, 1] > G, image[:,:, 2] < R),image[:,:, 0] < B)
         blue[:,:,1] = np.where(cond, 255, 0)    
         horizontal = np.array([[0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0],
@@ -136,8 +142,11 @@ class GREEN_FLOOR_Fit_ContourCV(classes.Base_Algorthm):
         geen_edges[:,:,1] = convolve2d(blue[:,:,1], horizontal + vertical, mode='same', boundary='fill', fillvalue=0)
 
         contours, _ = cv.findContours(geen_edges[:,:,1], cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-        largest_contour = max(contours, key=cv.contourArea)
-        cv.drawContours(geen_lines, [largest_contour], -1, (0, 255, 0), thickness=cv.FILLED)
+        try:
+            largest_contour = max(contours, key=cv.contourArea)
+            cv.drawContours(geen_lines, [largest_contour], -1, (0, 255, 0), thickness=cv.FILLED)
+        except:
+            pass
 
         self.feed.append(geen_lines)
         return geen_lines
@@ -157,7 +166,7 @@ class GREEN_FLOOR_Fit_ContourCV_SimpleControl_multiview(classes.Base_Algorthm):
         RIGHT = False
         SPIN = False
 
-        cond = np.logical_and(np.logical_and(image[:,:, 1] > 70, image[:,:, 2] < 100),image[:,:, 0] < 90)
+        cond = np.logical_and(np.logical_and(image[:,:, 1] > G, image[:,:, 2] < R),image[:,:, 0] < B)
         blue[:,:,1] = np.where(cond, 255, 0)    
         horizontal = np.array([[0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0],
@@ -223,7 +232,7 @@ class GREEN_FLOOR_Fit_ContourCV_SimpleControl_soloview(classes.Base_Algorthm):
         RIGHT = False
         SPIN = False
 
-        cond = np.logical_and(np.logical_and(image[:,:, 1] > 70, image[:,:, 2] < 100),image[:,:, 0] < 90)
+        cond = np.logical_and(np.logical_and(image[:,:, 1] > G, image[:,:, 2] < R),image[:,:, 0] < B)
         blue[:,:,1] = np.where(cond, 255, 0)    
         horizontal = np.array([[0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0],
@@ -238,8 +247,11 @@ class GREEN_FLOOR_Fit_ContourCV_SimpleControl_soloview(classes.Base_Algorthm):
         geen_edges[:,:,1] = convolve2d(blue[:,:,1], horizontal + vertical, mode='same', boundary='fill', fillvalue=0)
 
         contours, _ = cv.findContours(geen_edges[:,:,1], cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-        largest_contour = max(contours, key=cv.contourArea)
-        cv.drawContours(geen_lines, [largest_contour], -1, (0, 255, 0), thickness=cv.FILLED)
+        try:
+            largest_contour = max(contours, key=cv.contourArea)
+            cv.drawContours(geen_lines, [largest_contour], -1, (0, 255, 0), thickness=cv.FILLED)
+        except:
+            pass
 
 
         vert_check = np.sum(geen_lines[:,:,1], 0)
@@ -296,7 +308,7 @@ class GREEN_FLOOR_Fit_ContourCV_SimpleControl_soloview_Hidden(classes.Base_Algor
         RIGHT = False
         SPIN = False
 
-        cond = np.logical_and(np.logical_and(image[:,:, 1] > 70, image[:,:, 2] < 100),image[:,:, 0] < 90)
+        cond = np.logical_and(np.logical_and(image[:,:, 1] > G, image[:,:, 2] < R),image[:,:, 0] < B)
         blue[:,:,1] = np.where(cond, 255, 0)    
         horizontal = np.array([[0, 0, 0, 0, 0],
                       [0, 0, 0, 0, 0],
@@ -311,9 +323,11 @@ class GREEN_FLOOR_Fit_ContourCV_SimpleControl_soloview_Hidden(classes.Base_Algor
         geen_edges[:,:,1] = convolve2d(blue[:,:,1], horizontal + vertical, mode='same', boundary='fill', fillvalue=0)
 
         contours, _ = cv.findContours(geen_edges[:,:,1], cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-        largest_contour = max(contours, key=cv.contourArea)
-        cv.drawContours(geen_lines, [largest_contour], -1, (0, 255, 0), thickness=cv.FILLED)
-
+        try:
+            largest_contour = max(contours, key=cv.contourArea)
+            cv.drawContours(geen_lines, [largest_contour], -1, (0, 255, 0), thickness=cv.FILLED)
+        except:
+            pass
 
         vert_check = np.sum(geen_lines[:,:,1], 0)
         hort_check = geen_lines[-1,:,1]
