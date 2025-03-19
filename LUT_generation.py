@@ -7,10 +7,6 @@ import json
 wb = xw.Book("rgb_data.xlsx")
 sheet = wb.sheets['Sheet1']
 
-
-rgb_data = np.array(sheet.range("A2:C101").value)  
-labels = np.array(sheet.range("D2:D101").value)
-
 def clamp(value, min_value=0, max_value=255):
     return max(min_value, min(max_value, value))
 
@@ -33,21 +29,25 @@ def rgb_to_yuv(r, g, b):
     return y, u ,v
 
 
+
+data = sheet.range("A2:D101").value  
+
+
+X = []  
+y = []  
+
+for row in data:
+    if row and all(cell is not None for cell in row[:3]) and row[3] is not None:  # Ensure all RGB and label values are non-empty
+        r, g, b = row[:3]
+        yuv = rgb_to_yuv(int(r), int(g), int(b))  
+        X.append(yuv) 
+        y.append(row[3])  
+
+
+targets = np.array(X)
+labels = np.array(y)
+
 wb.close()
-
-
-targets = np.array([
-    [80, 110, 90],
-    [82, 112, 88],
-    [78, 108, 92],
-    [120, 130, 150],
-    [122, 128, 148],
-    [118, 132, 152],
-
-])
-labels= np.array([255, 255, 255, 0, 0, 0])
-
-
 clf = DecisionTreeClassifier(max_depth=8) 
 clf.fit(targets, labels)
 
