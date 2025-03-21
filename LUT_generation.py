@@ -2,6 +2,8 @@ import xlwings as xw
 import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 import json
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
 
 
 wb = xw.Book("rgb_data.xlsx")
@@ -33,24 +35,54 @@ def rgb_to_yuv(r, g, b):
 data = sheet.range("A2:D101").value  
 
 
-X = []  
-y = []  
+RGB = [] 
+YUV = [] 
+y = []
 
 for row in data:
     if row and all(cell is not None for cell in row[:3]) and row[3] is not None:  # Ensure all RGB and label values are non-empty
         r, g, b = row[:3]
-        yuv = rgb_to_yuv(int(r), int(g), int(b))  
-        X.append(yuv) 
-        y.append(row[3])  
+        RGB.append((int(r), int(g), int(b))) 
+        YUV.append(rgb_to_yuv(int(r), int(g), int(b)))
+        y.append(int(row[3]))  
 
 
-targets = np.array(X)
+targets = np.array(YUV)
 labels = np.array(y)
 
 wb.close()
-clf = DecisionTreeClassifier(max_depth=8) 
+
+fig_rgb = plt.figure()
+ax_rgb = fig_rgb.add_subplot(111, projection='3d')
+ax_rgb.set_title("RGB Values")
+ax_rgb.set_xlabel("Red")
+ax_rgb.set_ylabel("Green")
+ax_rgb.set_zlabel("Blue")
+
+for i, (r, g, b) in enumerate(RGB):
+    color = 'green' if labels[i] == 255 else 'black'
+    ax_rgb.scatter(r, g, b, color=color, s=20)
+
+fig_yuv = plt.figure()
+ax_yuv = fig_yuv.add_subplot(111, projection='3d')
+ax_yuv.set_title("YUV Values")
+ax_yuv.set_xlabel("Y")
+ax_yuv.set_ylabel("U")
+ax_yuv.set_zlabel("V")
+
+
+for i, (y, u, v) in enumerate(YUV):
+    color = 'green' if labels[i] == 255 else 'black'
+    ax_yuv.scatter(y, u, v, color=color, s=20)
+
+
+plt.show()
+
+
+clf = DecisionTreeClassifier(max_depth=3) 
 clf.fit(targets, labels)
 
+print(clf.score(targets,labels))
 
 tree = clf.tree_
 tree_dict = {
