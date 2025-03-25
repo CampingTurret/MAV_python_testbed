@@ -28,17 +28,18 @@ if __name__ == "__main__":
     ex_images: dict = Images[f"Images{seperator}{f1}"][f"Images{seperator}{f1}{seperator}{f2}"]
     I_len = len(ex_images)
     for sub in tqdm(Base_Algorthm.__subclasses__()):
-        dt = time.time()
-        cc = sub()
-        for k,image in tqdm(sorted(ex_images.items(), key=lambda x: x[0].split(seperator)[-1])):
-            if image == '.jpg':
-                im = cv.imread(pathlib.Path(k).absolute())
-                im = cv.transpose(im)
-                im = cv.flip(im, 0)
-                im = np.array(im)
-                cc.execute(im)
-        cc.gen_feed()
-        res.update({str(cc.__class__):{'t1': dt, 't2':time.time()}})
+        #if sub == "GREEN_FLOOR_Fit_ContourCV_SimpleControl_yuv" or sub == "PASS_Baseline":
+            dt = time.time()
+            cc = sub()
+            for k,image in tqdm(sorted(ex_images.items(), key=lambda x: x[0].split(seperator)[-1])):
+                if image == '.jpg':
+                    im = cv.imread(pathlib.Path(k).absolute())
+                    im = cv.transpose(im)
+                    im = cv.flip(im, 0)
+                    im = np.array(im)
+                    cc.execute(im)
+            cc.gen_feed()
+            res.update({str(cc.__class__):{'t1': dt, 't2':time.time()}})
     _dbaset = res["<class 'algortims.PASS_Baseline'>"]['t2'] - res["<class 'algortims.PASS_Baseline'>"]['t1']
     for key in res.keys():
         _dt = res[key]['t2'] - res[key]['t1'] 
