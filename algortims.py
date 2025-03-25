@@ -412,31 +412,39 @@ class GREEN_FLOOR_Fit_ContourCV_SimpleControl_yuv(classes.Base_Algorthm):
         geen_edges[:,:,1] = convolve2d(blue[:,:,1], horizontal + vertical, mode='same', boundary='fill', fillvalue=0)
 
         contours, _ = cv.findContours(geen_edges[:,:,1], cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-        try:
-            largest_contour = max(contours, key=cv.contourArea)
-            cv.drawContours(geen_lines, [largest_contour], -1, (0, 255, 0), thickness=cv.FILLED)
-        except:
-            pass
-
-
-        vert_check = np.sum(geen_lines[:,:,1], 0)
-        hort_check = geen_lines[-1,:,1]
-        geen_lines[-10,:,0] = np.where(hort_check,255, 0)
-        geen_lines[-50,:,0] = np.where(vert_check,255, 0)
-        geen_lines[:,:,2] = np.where(vert_check,0, 255)
-        if sum(hort_check)//255 < 30:
-            geen_lines[:,:,0] = np.where(geen_lines[-1,:,2],0, 255)
-            SPIN = True
         
-        sh = np.shape(geen_lines)
-        middle = (sh[0]//2 -1, sh[1]//2 -1)
-        middle_cv = (middle[-1], middle[0])
-        _slice =  int(sh[1]*0.1/2)
-        if sum(geen_lines[-1,(middle[1]-_slice):(middle[1]+_slice),2])//255 > 0:
-            if sum(geen_lines[-1,(middle[1]-_slice):,1]) > sum(geen_lines[-1,:(middle[1]+_slice),1]):
-                RIGHT = True
-            else:
-                LEFT = True
+        if contours:
+            #check whether if needed here later
+            largest_contour = max(contours, key=cv.contourArea)
+            contour_x = largest_contour[:, 0, 0]
+            contour_y = largest_contour[:, 0, 1]
+            #TODO: work with contour coordinates instead of filling it in 
+        
+        # try:
+        #     largest_contour = max(contours, key=cv.contourArea)
+        #     cv.drawContours(geen_lines, [largest_contour], -1, (0, 255, 0), thickness=cv.FILLED)
+        # except:
+        #     pass
+
+
+        # vert_check = np.sum(geen_lines[:,:,1], 0)
+        # hort_check = geen_lines[-1,:,1]
+        # geen_lines[-10,:,0] = np.where(hort_check,255, 0)
+        # geen_lines[-50,:,0] = np.where(vert_check,255, 0)
+        # geen_lines[:,:,2] = np.where(vert_check,0, 255)
+        # if sum(hort_check)//255 < 30:
+        #     geen_lines[:,:,0] = np.where(geen_lines[-1,:,2],0, 255)
+        #     SPIN = True
+        
+        # sh = np.shape(geen_lines)
+        # middle = (sh[0]//2 -1, sh[1]//2 -1)
+        # middle_cv = (middle[-1], middle[0])
+        # _slice =  int(sh[1]*0.1/2)
+        # if sum(geen_lines[-1,(middle[1]-_slice):(middle[1]+_slice),2])//255 > 0:
+        #     if sum(geen_lines[-1,(middle[1]-_slice):,1]) > sum(geen_lines[-1,:(middle[1]+_slice),1]):
+        #         RIGHT = True
+        #     else:
+        #         LEFT = True
 
         if SPIN:
             cv.putText(geen_lines, "SPIN", middle_cv, cv.FONT_HERSHEY_PLAIN, 5, (255,255,255), thickness=3) 
