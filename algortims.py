@@ -451,6 +451,7 @@ class GREEN_FLOOR_Fit_ContourCV_SimpleControl_yuv(classes.Base_Algorthm):
                     RIGHT= True #right or left here?
                 else:
                     LEFT = True
+            #todo: red vertical lines
                 ######################################################################
                 # Extract the last row from the image
                 #last_row = geen_lines[-1, :, 1] 
