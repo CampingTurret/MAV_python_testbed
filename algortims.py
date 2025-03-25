@@ -419,7 +419,7 @@ class GREEN_FLOOR_Fit_ContourCV_SimpleControl_yuv(classes.Base_Algorthm):
             contour_x = largest_contour[:, 0, 0]
             contour_y = largest_contour[:, 0, 1]
             #TODO: work with contour coordinates instead of filling it in 
-        
+            #(just need to understand whats happening in original code to replicate it)
         # try:
         #     largest_contour = max(contours, key=cv.contourArea)
         #     cv.drawContours(geen_lines, [largest_contour], -1, (0, 255, 0), thickness=cv.FILLED)
